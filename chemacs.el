@@ -23,13 +23,30 @@
 ;;; Code:
 (require 'seq)
 
-(defvar chemacs-version "2.0")
-(defvar config-home (or (getenv "XDG_CONFIG_HOME") "~/.config"))
-(defvar chemacs-profiles-paths (list "~/.emacs-profiles.el" (format "%s/%s" config-home "chemacs/profiles.el" )))
-(defvar chemacs-default-profile-paths (list "~/.emacs-profile" (format "%s/%s" config-home "chemacs/profile")))
+(defsubst chemacs-current-path ()
+  (let ((current-file (or load-file-name (buffer-file-name))))
+    (if (file-exists-p current-file)
+        (directory-file-name (file-name-directory current-file)))))
 
-(defvar chemacs-profiles-path (or (car (seq-filter 'file-exists-p chemacs-profiles-paths)) (car chemacs-profiles-paths)))
-(defvar chemacs-default-profile-path (or (car (seq-filter 'file-exists-p chemacs-default-profile-paths)) (car chemacs-default-profile-paths)))
+(defvar chemacs-version "2.0")
+
+(defvar config-home (or (getenv "XDG_CONFIG_HOME") "~/.config"))
+(defvar chemacs-profiles-paths
+  (list "~/.emacs-profiles.el"
+        (format "%s/%s" (chemacs-current-path) "profiles.el")
+        (format "%s/%s" config-home "chemacs/profiles.el" )))
+(defvar chemacs-default-profile-paths
+  (list
+   "~/.emacs-profile"
+   (format "%s/%s" (chemacs-current-path) "profile")
+   (format "%s/%s" config-home "chemacs/profile")))
+
+(defvar chemacs-profiles-path
+  (or (car (seq-filter 'file-exists-p chemacs-profiles-paths))
+      (car chemacs-profiles-paths)))
+(defvar chemacs-default-profile-path
+  (or (car (seq-filter 'file-exists-p chemacs-default-profile-paths))
+      (car chemacs-default-profile-paths)))
 
 (when (not (file-exists-p chemacs-profiles-path))
   (error "[chemacs] %s does not exist." chemacs-profiles-path))
